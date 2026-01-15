@@ -2,6 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 
+def props = new Properties()
+def propFile = rootProject.file('local.properties')
+if (propFile.exists()) {
+    props.load(new FileInputStream(propFile))
+}
+
 android {
     compileSdk 35
     buildToolsVersion = '35.0.0'
@@ -65,8 +71,21 @@ android {
 
     }
 
+    // 1. 定义签名配置
+    signingConfigs {
+        release {
+            storeFile file("props['RELEASE_KEY_STORE_FILE']") // 签名文件路径
+            storePassword props['RELEASE_STORE_PASSWORD']
+            keyAlias props['RELEASE_KEY_ALIAS']
+            keyPassword props['RELEASE_KEY_PASSWORD']
+        }
+    }
+
     buildTypes {
         release {
+            // 2. 将签名配置应用到 release 构建类型
+            signingConfig signingConfigs.release
+
             shrinkResources true
             minifyEnabled true
             debuggable false
@@ -74,6 +93,7 @@ android {
         }
 
         debug {
+            // debug 通常会自动使用系统默认的 debug.keystore，不需要额外配置
             applicationIdSuffix ".debug"
             debuggable true
         }
@@ -124,7 +144,6 @@ dependencies {
     implementation 'androidx.media3:media3-ui:1.8.0'
     implementation 'androidx.media3:media3-exoplayer-hls:1.8.0'
     tempusImplementation 'androidx.media3:media3-cast:1.8.0'
-
 
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
     annotationProcessor 'androidx.room:room-compiler:2.6.1'
