@@ -4,9 +4,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +21,9 @@ import android.widget.ToggleButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.MediaMetadata;
@@ -29,9 +33,11 @@ import androidx.media3.common.util.RepeatModeUtil;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.session.MediaBrowser;
 import androidx.media3.session.SessionToken;
+import androidx.media3.ui.PlayerControlView;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.transition.TransitionManager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.cappielloantonio.tempo.R;
@@ -109,7 +115,29 @@ public class PlayerControllerFragment extends Fragment {
         initArtistLabelButton();
         initEqualizerButton();
 
+
+
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // 初始化布局状态
+        if (getActivity() != null) {
+            updateLayoutConstraints(getActivity().isInMultiWindowMode(),
+                    getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE,
+                    getResources().getConfiguration().screenHeightDp);
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        boolean isLandscape = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
+        // 检查是否处于分屏模式
+        boolean isSplitScreen = requireActivity().isInMultiWindowMode();
+        updateLayoutConstraints(isSplitScreen, isLandscape, newConfig.screenHeightDp);
     }
 
     @Override
@@ -168,6 +196,327 @@ public class PlayerControllerFragment extends Fragment {
         mediaBrowserListenableFuture = new MediaBrowser.Builder(requireContext(), new SessionToken(requireContext(), new ComponentName(requireContext(), MediaService.class))).buildAsync();
     }
 
+
+    private void updateLayoutConstraints(boolean isSplit, boolean isLandScape, int currentHeightDp) {
+        if (bind == null || getView() == null ) return;
+        ConstraintLayout constraintLayout = bind.getRoot().findViewById(R.id.now_playing_media_controller_layout);
+
+        if (constraintLayout == null) return;
+        ConstraintSet constraintSet = new ConstraintSet();
+
+        constraintSet.clone(constraintLayout);
+
+        if (isSplit) {
+            constraintSet.create(R.id.guideline, ConstraintSet.HORIZONTAL_GUIDELINE);
+            constraintSet.setGuidelinePercent(R.id.guideline, 0.575f);
+
+            constraintSet.setVisibility(R.id.player_asset_link_row, View.GONE);
+            constraintSet.setVisibility(R.id.player_media_quality_sector, View.GONE);
+
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.TOP);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.BOTTOM);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.END);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.BOTTOM, R.id.guideline, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+
+            constraintSet.clear(R.id.rating_container, ConstraintSet.START);
+            constraintSet.clear(R.id.rating_container, ConstraintSet.TOP);
+            constraintSet.connect(R.id.rating_container, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.rating_container, ConstraintSet.TOP, R.id.guideline, ConstraintSet.BOTTOM);
+
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.END);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.END, R.id.button_favorite, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.TOP, R.id.rating_container, ConstraintSet.BOTTOM);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.TOP, 18);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.START, 24);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.END, 24);
+
+//            constraintSet.removeFromVerticalChain(R.id.player_media_title_label);
+
+            constraintSet.clear(R.id.player_artist_name_label, ConstraintSet.BOTTOM);
+            constraintSet.clear(R.id.player_artist_name_label, ConstraintSet.START);
+            constraintSet.connect(R.id.player_artist_name_label, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.setMargin(R.id.player_artist_name_label, ConstraintSet.TOP, 8);
+            constraintSet.setMargin(R.id.player_artist_name_label, ConstraintSet.START, 24);
+            constraintSet.setMargin(R.id.player_artist_name_label, ConstraintSet.END, 24);
+
+            constraintSet.clear(R.id.exo_position, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_position, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.setMargin(R.id.exo_position, ConstraintSet.START, 24);
+
+            constraintSet.setMargin(R.id.exo_progress, ConstraintSet.TOP, 8);
+            constraintSet.clear(R.id.exo_progress, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_progress, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.setMargin(R.id.exo_progress, ConstraintSet.START, 16);
+
+            constraintSet.setVisibility(R.id.player_quick_action_view, View.GONE);
+
+            int[] hChainIds = {
+                    R.id.placeholder_view_left,
+                    R.id.placeholder_view_middle_left,
+                    R.id.player_play_pause_placeholder_view,
+                    R.id.placeholder_view_middle_right,
+                    R.id.placeholder_view_right
+            };
+
+            // 统一清理并设置垂直约束
+            for (int viewId : hChainIds) {
+                constraintSet.clear(viewId, ConstraintSet.TOP);
+                constraintSet.clear(viewId, ConstraintSet.BOTTOM);
+                constraintSet.clear(viewId, ConstraintSet.START);
+                constraintSet.clear(viewId, ConstraintSet.END);
+                constraintSet.clear(viewId, ConstraintSet.LEFT);
+                constraintSet.clear(viewId, ConstraintSet.RIGHT);
+
+                constraintSet.connect(viewId, ConstraintSet.TOP, R.id.exo_progress, ConstraintSet.BOTTOM);
+                constraintSet.connect(viewId, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+                // 调整这个 Bias 值可以上下移动整行控件
+                constraintSet.setVerticalBias(viewId, 0.45f);
+            }
+
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+
+            constraintSet.connect(R.id.placeholder_view_middle_left, ConstraintSet.START, R.id.placeholder_view_left, ConstraintSet.END);
+            constraintSet.connect(R.id.placeholder_view_middle_left, ConstraintSet.END, R.id.player_play_pause_placeholder_view, ConstraintSet.START);
+
+            constraintSet.connect(R.id.placeholder_view_middle_right, ConstraintSet.START, R.id.player_play_pause_placeholder_view, ConstraintSet.END);
+            constraintSet.connect(R.id.placeholder_view_middle_right, ConstraintSet.END, R.id.placeholder_view_right, ConstraintSet.START);
+
+            constraintSet.connect(R.id.placeholder_view_left, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.placeholder_view_left, ConstraintSet.END, R.id.placeholder_view_middle_left, ConstraintSet.START);
+
+            constraintSet.connect(R.id.placeholder_view_right, ConstraintSet.START, R.id.placeholder_view_middle_right, ConstraintSet.END);
+            constraintSet.connect(R.id.placeholder_view_right, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+
+
+            constraintSet.setMargin(R.id.player_play_pause_placeholder_view, ConstraintSet.TOP, 0);
+
+            if (currentHeightDp < 600){
+                constraintSet.constrainHeight(R.id.player_play_pause_placeholder_view, 48);
+                constraintSet.constrainWidth(R.id.player_play_pause_placeholder_view, 48);
+            }
+
+        } else if (isLandScape){
+
+            // --- 恢复正常横屏布局 ---
+            // 恢复辅助线
+            constraintSet.create(R.id.guideline, ConstraintSet.VERTICAL_GUIDELINE);
+            constraintSet.setGuidelinePercent(R.id.guideline, 0.59f);
+            constraintSet.setVisibility(R.id.player_media_cover_view_pager, View.VISIBLE);
+
+            constraintSet.constrainWidth(R.id.player_media_quality_sector, 0);
+            constraintSet.clear(R.id.player_media_quality_sector, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_quality_sector, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_quality_sector, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+            constraintSet.connect(R.id.player_media_quality_sector, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+
+            constraintSet.setVisibility(R.id.player_asset_link_row, View.GONE);
+
+
+            // 重新建立其他的核心约束 (Bias 必须在有 Top 和 Bottom 约束的情况下才生效)
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.TOP);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.BOTTOM);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.END);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.END, R.id.guideline, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            // bias 值 (float)，0.0 是顶部，1.0 是底部，0.5 是中间
+            constraintSet.setVerticalBias(R.id.player_media_cover_view_pager, 0.521f);
+            constraintSet.setHorizontalBias(R.id.player_media_cover_view_pager, 0.8f);
+
+            constraintSet.clear(R.id.rating_container, ConstraintSet.START);
+            constraintSet.clear(R.id.rating_container, ConstraintSet.TOP);
+            constraintSet.connect(R.id.rating_container, ConstraintSet.START, R.id.guideline, ConstraintSet.START);
+            constraintSet.connect(R.id.rating_container, ConstraintSet.TOP, R.id.player_media_quality_sector, ConstraintSet.BOTTOM);
+
+            constraintSet.setVerticalChainStyle(R.id.player_media_title_label, ConstraintSet.CHAIN_PACKED);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.END);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.END, R.id.button_favorite, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.START, R.id.guideline, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.TOP, R.id.rating_container, ConstraintSet.BOTTOM);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.TOP, 0);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.START, 24);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.END, 24);
+
+            constraintSet.clear(R.id.player_artist_name_label, ConstraintSet.START);
+            constraintSet.clear(R.id.player_artist_name_label, ConstraintSet.BOTTOM);
+            constraintSet.connect(R.id.player_artist_name_label, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+            constraintSet.connect(R.id.player_artist_name_label, ConstraintSet.BOTTOM, R.id.exo_progress, ConstraintSet.TOP);
+
+            /*button_favorite**/
+            constraintSet.clear(R.id.exo_position, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_position, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+
+            constraintSet.setMargin(R.id.exo_progress, ConstraintSet.TOP, 20);
+            constraintSet.clear(R.id.exo_progress, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_progress, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+
+            constraintSet.clear(R.id.placeholder_view_left, ConstraintSet.START);
+            constraintSet.connect(R.id.placeholder_view_left, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+
+            constraintSet.clear(R.id.player_play_pause_placeholder_view, ConstraintSet.START);
+            constraintSet.clear(R.id.player_play_pause_placeholder_view, ConstraintSet.BOTTOM);
+            constraintSet.clear(R.id.player_play_pause_placeholder_view, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.TOP, R.id.exo_progress, ConstraintSet.BOTTOM);
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.BOTTOM, R.id.player_quick_action_view, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+            constraintSet.setMargin(R.id.player_play_pause_placeholder_view, ConstraintSet.TOP, 36);
+
+            /* placeholder_view_middle_right */
+
+            constraintSet.clear(R.id.player_playback_speed_button, ConstraintSet.START);
+            constraintSet.connect(R.id.player_playback_speed_button, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+
+            constraintSet.clear(R.id.exo_shuffle, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_shuffle, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+
+            /* exo_rew   exo_prev  */
+
+            constraintSet.clear(R.id.exo_play_pause, ConstraintSet.TOP);
+            constraintSet.clear(R.id.exo_play_pause, ConstraintSet.END);
+            constraintSet.clear(R.id.exo_play_pause, ConstraintSet.START);
+            constraintSet.clear(R.id.exo_play_pause, ConstraintSet.BOTTOM);
+            constraintSet.connect(R.id.exo_play_pause, ConstraintSet.TOP, R.id.player_play_pause_placeholder_view, ConstraintSet.TOP);
+            constraintSet.connect(R.id.exo_play_pause, ConstraintSet.END, R.id.player_play_pause_placeholder_view, ConstraintSet.END);
+            constraintSet.connect(R.id.exo_play_pause, ConstraintSet.START, R.id.player_play_pause_placeholder_view, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_play_pause, ConstraintSet.BOTTOM, R.id.player_play_pause_placeholder_view, ConstraintSet.BOTTOM);
+
+            constraintSet.clear(R.id.player_quick_action_view, ConstraintSet.START);
+            constraintSet.connect(R.id.player_quick_action_view, ConstraintSet.START, R.id.guideline, ConstraintSet.END);
+            constraintSet.setVisibility(R.id.player_quick_action_view, View.GONE);
+
+
+        }else {
+            constraintSet.create(R.id.guideline, ConstraintSet.HORIZONTAL_GUIDELINE);
+            constraintSet.setGuidelinePercent(R.id.guideline, 0.575f);
+
+            constraintSet.setVisibility(R.id.player_asset_link_row, View.GONE);
+
+            constraintSet.constrainWidth(R.id.player_media_quality_sector, 0);
+            constraintSet.clear(R.id.player_media_quality_sector, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_quality_sector, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_quality_sector, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_quality_sector, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.TOP);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.BOTTOM);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_cover_view_pager, ConstraintSet.END);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.TOP, R.id.player_media_quality_sector, ConstraintSet.BOTTOM);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.BOTTOM, R.id.guideline, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+            constraintSet.connect(R.id.player_media_cover_view_pager, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+
+            constraintSet.clear(R.id.rating_container, ConstraintSet.START);
+            constraintSet.clear(R.id.rating_container, ConstraintSet.TOP);
+            constraintSet.connect(R.id.rating_container, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.rating_container, ConstraintSet.TOP, R.id.guideline, ConstraintSet.BOTTOM);
+
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.END);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.START);
+            constraintSet.clear(R.id.player_media_title_label, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.END, R.id.button_favorite, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_media_title_label, ConstraintSet.TOP, R.id.rating_container, ConstraintSet.BOTTOM);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.TOP, 18);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.START, 24);
+            constraintSet.setMargin(R.id.player_media_title_label, ConstraintSet.END, 24);
+
+//            constraintSet.removeFromVerticalChain(R.id.player_media_title_label);
+
+            constraintSet.clear(R.id.player_artist_name_label, ConstraintSet.BOTTOM);
+            constraintSet.clear(R.id.player_artist_name_label, ConstraintSet.START);
+            constraintSet.connect(R.id.player_artist_name_label, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.setMargin(R.id.player_artist_name_label, ConstraintSet.TOP, 8);
+            constraintSet.setMargin(R.id.player_artist_name_label, ConstraintSet.START, 24);
+            constraintSet.setMargin(R.id.player_artist_name_label, ConstraintSet.END, 24);
+
+            constraintSet.clear(R.id.exo_position, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_position, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.setMargin(R.id.exo_position, ConstraintSet.START, 24);
+
+            constraintSet.setMargin(R.id.exo_progress, ConstraintSet.TOP, 8);
+            constraintSet.clear(R.id.exo_progress, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_progress, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.setMargin(R.id.exo_progress, ConstraintSet.START, 16);
+
+            constraintSet.clear(R.id.player_quick_action_view, ConstraintSet.START);
+            constraintSet.clear(R.id.player_quick_action_view, ConstraintSet.TOP);
+            constraintSet.clear(R.id.player_quick_action_view, ConstraintSet.END);
+            constraintSet.clear(R.id.player_quick_action_view, ConstraintSet.BOTTOM);
+            constraintSet.constrainWidth(R.id.player_quick_action_view, 0);
+            int heightInPx = getResources().getDimensionPixelSize(R.dimen.now_playing_bottom_peek_height);
+            constraintSet.constrainHeight(R.id.player_quick_action_view, heightInPx);
+            constraintSet.connect(R.id.player_quick_action_view, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_quick_action_view, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+            constraintSet.connect(R.id.player_quick_action_view, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+            constraintSet.setVisibility(R.id.player_quick_action_view, View.VISIBLE);
+
+            int[] hChainIds = {
+                    R.id.placeholder_view_left,
+                    R.id.placeholder_view_middle_left,
+                    R.id.player_play_pause_placeholder_view,
+                    R.id.placeholder_view_middle_right,
+                    R.id.placeholder_view_right
+            };
+
+            // 统一清理并设置垂直约束
+            for (int viewId : hChainIds) {
+                constraintSet.clear(viewId, ConstraintSet.TOP);
+                constraintSet.clear(viewId, ConstraintSet.BOTTOM);
+                constraintSet.clear(viewId, ConstraintSet.START);
+                constraintSet.clear(viewId, ConstraintSet.END);
+                constraintSet.clear(viewId, ConstraintSet.LEFT);
+                constraintSet.clear(viewId, ConstraintSet.RIGHT);
+
+                constraintSet.connect(viewId, ConstraintSet.TOP, R.id.exo_progress, ConstraintSet.BOTTOM);
+                constraintSet.connect(viewId, ConstraintSet.BOTTOM, R.id.player_quick_action_view, ConstraintSet.TOP);
+                // 调整这个 Bias 值可以上下移动整行控件
+                constraintSet.setVerticalBias(viewId, 0.45f);
+            }
+
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.player_play_pause_placeholder_view, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+
+            constraintSet.connect(R.id.placeholder_view_middle_left, ConstraintSet.START, R.id.placeholder_view_left, ConstraintSet.END);
+            constraintSet.connect(R.id.placeholder_view_middle_left, ConstraintSet.END, R.id.player_play_pause_placeholder_view, ConstraintSet.START);
+
+            constraintSet.connect(R.id.placeholder_view_middle_right, ConstraintSet.START, R.id.player_play_pause_placeholder_view, ConstraintSet.END);
+            constraintSet.connect(R.id.placeholder_view_middle_right, ConstraintSet.END, R.id.placeholder_view_right, ConstraintSet.START);
+
+            constraintSet.connect(R.id.placeholder_view_left, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+            constraintSet.connect(R.id.placeholder_view_left, ConstraintSet.END, R.id.placeholder_view_middle_left, ConstraintSet.START);
+
+            constraintSet.connect(R.id.placeholder_view_right, ConstraintSet.START, R.id.placeholder_view_middle_right, ConstraintSet.END);
+            constraintSet.connect(R.id.placeholder_view_right, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+
+
+            constraintSet.setMargin(R.id.player_play_pause_placeholder_view, ConstraintSet.TOP, 0);
+
+            constraintSet.clear(R.id.player_playback_speed_button, ConstraintSet.TOP);
+            constraintSet.connect(R.id.player_playback_speed_button, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+
+            constraintSet.clear(R.id.exo_shuffle, ConstraintSet.START);
+            constraintSet.connect(R.id.exo_shuffle, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+
+        }
+
+        TransitionManager.beginDelayedTransition(constraintLayout);
+        constraintSet.applyTo(constraintLayout);
+    }
+
+
     private void releaseBrowser() {
         MediaBrowser.releaseFuture(mediaBrowserListenableFuture);
     }
@@ -178,6 +527,7 @@ public class PlayerControllerFragment extends Fragment {
                 MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
 
                 bind.nowPlayingMediaControllerView.setPlayer(mediaBrowser);
+                assert mediaBrowser != null;
                 mediaBrowser.setShuffleModeEnabled(Preferences.isShuffleModeEnabled());
                 mediaBrowser.setRepeatMode(Preferences.getRepeatMode());
                 setMediaControllerListener(mediaBrowser);

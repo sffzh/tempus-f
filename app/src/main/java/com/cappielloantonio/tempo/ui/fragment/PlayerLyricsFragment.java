@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +28,7 @@ import com.cappielloantonio.tempo.databinding.InnerFragmentPlayerLyricsBinding;
 import com.cappielloantonio.tempo.service.MediaService;
 import com.cappielloantonio.tempo.subsonic.models.Line;
 import com.cappielloantonio.tempo.subsonic.models.LyricsList;
+import com.cappielloantonio.tempo.subsonic.models.StructuredLyrics;
 import com.cappielloantonio.tempo.util.MusicUtil;
 import com.cappielloantonio.tempo.util.Preferences;
 import com.cappielloantonio.tempo.viewmodel.PlayerBottomSheetViewModel;
@@ -38,6 +38,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @OptIn(markerClass = UnstableApi.class)
@@ -232,13 +233,15 @@ public class PlayerLyricsFragment extends Fragment {
         return value != null && !value.trim().isEmpty();
     }
 
+    private boolean listIsNotEmpty(List<?> list) {
+        return list != null && !list.isEmpty();
+    }
+
     private boolean hasStructuredLyrics(LyricsList lyricsList) {
-        return lyricsList != null
-                && lyricsList.getStructuredLyrics() != null
-                && !lyricsList.getStructuredLyrics().isEmpty()
-                && lyricsList.getStructuredLyrics().get(0) != null
-                && lyricsList.getStructuredLyrics().get(0).getLine() != null
-                && !lyricsList.getStructuredLyrics().get(0).getLine().isEmpty();
+        return Objects.nonNull(lyricsList)
+                && listIsNotEmpty(lyricsList.getStructuredLyrics())
+                && Objects.nonNull(lyricsList.getStructuredLyrics().get(0))
+                && listIsNotEmpty(lyricsList.getStructuredLyrics().get(0).getLine());
     }
 
     @SuppressLint("DefaultLocale")
