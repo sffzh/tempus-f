@@ -16,8 +16,11 @@ android {
         minSdkVersion 24
         targetSdk 35
 
-        versionCode 26011702
-        versionName '4.6.4.26011701'
+        // 添加 HarmonyOS 支持
+        manifestPlaceholders["HARMONYOS_SUPPORT"] = "true"
+
+        versionCode 26011801
+        versionName '4.6.4.26011801'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         javaCompileOptions {
@@ -131,6 +134,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation "androidx.media:media:1.7.0"
 
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.core:core-ktx:1.13.1'
 
     // Android Material
     implementation 'com.google.android.material:material:1.10.0'

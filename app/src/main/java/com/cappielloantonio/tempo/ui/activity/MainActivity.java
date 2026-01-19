@@ -309,8 +309,8 @@ public class MainActivity extends BaseActivity {
     }
 
     private void autoPlay(MediaBrowser browser) {
-        // 不是首次启动 → 不自动播放
-        if (!Preferences.isFirstLaunch()) {
+        // 上次退出时播放器是暂停状态
+        if (Preferences.isPaused()) {
             return;
         }
 
@@ -324,7 +324,6 @@ public class MainActivity extends BaseActivity {
                 Log.d(TAG, "MediaBrowser about to auto-start");
                 if (browser.getMediaItemCount() > 0) {
                     browser.play();
-                    Preferences.setFirstLaunch(false); // 播放后标记为已启动
                 }
             } catch (Throwable e) {
                 Log.e(TAG, "Auto-play failed", e);

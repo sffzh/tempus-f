@@ -1,6 +1,7 @@
 package com.cappielloantonio.tempo.service;
 
 import android.content.ComponentName;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -26,7 +27,7 @@ import com.cappielloantonio.tempo.repository.SongRepository;
 import com.cappielloantonio.tempo.subsonic.models.Child;
 import com.cappielloantonio.tempo.subsonic.models.InternetRadioStation;
 import com.cappielloantonio.tempo.subsonic.models.PodcastEpisode;
-import com.cappielloantonio.tempo.util.Constants.SeedType;
+import com.cappielloantonio.tempo.util.Constants;
 import com.cappielloantonio.tempo.util.MappingUtil;
 import com.cappielloantonio.tempo.util.Preferences;
 import com.cappielloantonio.tempo.viewmodel.PlaybackViewModel;
@@ -36,7 +37,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,6 +51,18 @@ public class MediaManager {
     public static AtomicBoolean justStarted = new AtomicBoolean(false);
 
     private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
+
+    public static List<Child> getTracks(Bundle bundle){
+        return bundle.getParcelableArrayList(Constants.TRACKS_OBJECT, Child.class);
+    }
+
+    public static Child getTrackItem(Bundle bundle) {
+        ArrayList<Child> parcelableArrayList = bundle.getParcelableArrayList(Constants.TRACKS_OBJECT, Child.class);
+        if (parcelableArrayList != null){
+            return parcelableArrayList.get(bundle.getInt(Constants.ITEM_POSITION));
+        }
+        return null;
+    }
 
     public static void registerPlaybackObserver(
             ListenableFuture<MediaBrowser> browserFuture,
@@ -114,16 +129,17 @@ public class MediaManager {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        if (mediaBrowserListenableFuture.get().isPlaying()) {
-                            mediaBrowserListenableFuture.get().pause();
+                        MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
+                        assert mediaBrowser != null;
+                        if (mediaBrowser.isPlaying()) {
+                            mediaBrowser.pause();
                         }
-
-                        mediaBrowserListenableFuture.get().stop();
-                        mediaBrowserListenableFuture.get().clearMediaItems();
+                        mediaBrowser.stop();
+                        mediaBrowser.clearMediaItems();
                         clearDatabase();
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "hide", e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -134,12 +150,14 @@ public class MediaManager {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        if (mediaBrowserListenableFuture.get().isPlaying()) {
-                            mediaBrowserListenableFuture.get().pause();
+                        MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
+                        assert mediaBrowser != null;
+                        if (mediaBrowser.isPlaying()) {
+                            mediaBrowser.pause();
                         }
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "hide", e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -150,15 +168,15 @@ public class MediaManager {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        if (mediaBrowserListenableFuture.get().getMediaItemCount() < 1) {
+                        if (Objects.requireNonNull(mediaBrowserListenableFuture.get()).getMediaItemCount() < 1) {
                             List<Child> media = getQueueRepository().getMedia();
-                            if (media != null && media.size() >= 1) {
+                            if (media != null && !media.isEmpty()) {
                                 init(mediaBrowserListenableFuture, media);
                             }
                         }
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "check", e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -169,16 +187,89 @@ public class MediaManager {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        mediaBrowserListenableFuture.get().clearMediaItems();
-                        mediaBrowserListenableFuture.get().setMediaItems(MappingUtil.mapMediaItems(media));
-                        mediaBrowserListenableFuture.get().seekTo(getQueueRepository().getLastPlayedMediaIndex(), getQueueRepository().getLastPlayedMediaTimestamp());
-                        mediaBrowserListenableFuture.get().prepare();
+                        MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
+                        assert mediaBrowser != null;
+                        mediaBrowser.clearMediaItems();
+                        mediaBrowser.setMediaItems(MappingUtil.mapMediaItems(media));
+                        mediaBrowser.seekTo(getQueueRepository().getLastPlayedMediaIndex(), getQueueRepository().getLastPlayedMediaTimestamp());
+                        mediaBrowser.prepare();
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "init", e);
                 }
             }, MoreExecutors.directExecutor());
         }
+    }
+
+    public interface MediaBrowserHandler{
+        void run(@NonNull ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, @NonNull MediaBrowser mediaBrowser);
+    }
+
+    public static void addListener(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, MediaBrowserHandler... runnable) {
+        if (mediaBrowserListenableFuture == null) return;
+        mediaBrowserListenableFuture.addListener(()->{
+            try {
+                if (mediaBrowserListenableFuture.isDone()) {
+                    MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
+                    assert mediaBrowser != null;
+                    for (MediaBrowserHandler work: runnable){
+                        work.run(mediaBrowserListenableFuture, mediaBrowser);
+                    }
+                }
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e(TAG, "addListener", e);
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
+    public static void disableShuffle(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture){
+        addListener(mediaBrowserListenableFuture, (future, mediaBrowser)->{
+            Preferences.setShuffleModeEnabled(false);
+            mediaBrowser.setShuffleModeEnabled(false);
+        });
+    }
+
+    public static MediaBrowserHandler startQueueHandler(int startIndex, List<Child> medias){
+        return (future, browser)->{
+
+            if (medias == null) return;
+            if (medias.size() == 1){
+                browser.setMediaItem(MappingUtil.mapMediaItem(medias.get(0)));
+                browser.prepare();
+                browser.play();
+                enqueueDatabase(medias.get(0));
+                getQueueRepository().insert(medias.get(0), true, 0);
+                return;
+            }
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                justStarted.set(true);
+                browser.setMediaItems(MappingUtil.mapMediaItems(medias), startIndex, 0);
+                browser.prepare();
+
+                Player.Listener timelineListener = new Player.Listener() {
+                    @Override
+                    public void onTimelineChanged(@NonNull Timeline timeline, int reason) {
+
+                        int itemCount = browser.getMediaItemCount();
+                        if (startIndex >= 0 && startIndex < itemCount) {
+                            browser.seekTo(startIndex, 0);
+                            browser.play();
+                            browser.removeListener(this);
+                        } else {
+                            Log.d(TAG, "Cannot start playback: itemCount=" + itemCount + ", startIndex=" + startIndex);
+                        }
+                    }
+                };
+
+                browser.addListener(timelineListener);
+            });
+
+            backgroundExecutor.execute(() -> {
+                Log.d(TAG, "Background: enqueuing to database");
+                getQueueRepository().insertAll(medias, true, 0);
+            });
+        };
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -190,18 +281,19 @@ public class MediaManager {
                     if (mediaBrowserListenableFuture.isDone()) {
                         final MediaBrowser browser = mediaBrowserListenableFuture.get();
                         final List<MediaItem> items = MappingUtil.mapMediaItems(media);
-                        
+
                         new Handler(Looper.getMainLooper()).post(() -> {
                             justStarted.set(true);
+                            assert browser != null;
                             browser.setMediaItems(items, startIndex, 0);
                             browser.prepare();
 
                             Player.Listener timelineListener = new Player.Listener() {
                                 @Override
-                                public void onTimelineChanged(Timeline timeline, int reason) {
-                                    
+                                public void onTimelineChanged(@NonNull Timeline timeline, int reason) {
+
                                     int itemCount = browser.getMediaItemCount();
-                                    if (itemCount > 0 && startIndex >= 0 && startIndex < itemCount) {
+                                    if (startIndex >= 0 && startIndex < itemCount) {
                                         browser.seekTo(startIndex, 0);
                                         browser.play();
                                         browser.removeListener(this);
@@ -210,17 +302,17 @@ public class MediaManager {
                                     }
                                 }
                             };
-                            
+
                             browser.addListener(timelineListener);
                         });
 
                         backgroundExecutor.execute(() -> {
                             Log.d(TAG, "Background: enqueuing to database");
-                            enqueueDatabase(media, true, 0);
+                            getQueueRepository().insertAll(media, true, 0);
                         });
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    Log.e(TAG, "Error in startQueue: " + e.getMessage(), e);
+                    Log.e(TAG, "startQueue with list", e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -233,13 +325,14 @@ public class MediaManager {
                     if (mediaBrowserListenableFuture.isDone()) {
                         MediaBrowser browser = mediaBrowserListenableFuture.get();
                         justStarted.set(true);
+                        assert browser != null;
                         browser.setMediaItem(MappingUtil.mapMediaItem(media));
                         browser.prepare();
                         browser.play();
-                        enqueueDatabase(media, true, 0);
+                        getQueueRepository().insert(media,true,0);
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "startQueue", e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -252,13 +345,14 @@ public class MediaManager {
                     if (mediaBrowserListenableFuture.isDone()) {
                         MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
                         justStarted.set(true);
+                        assert mediaBrowser != null;
                         mediaBrowser.setMediaItem(mediaItem);
                         mediaBrowser.prepare();
                         mediaBrowser.play();
                         clearDatabase();
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "playDownloadedMediaItem",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -271,12 +365,13 @@ public class MediaManager {
                     if (mediaBrowserListenableFuture.isDone()) {
                         MediaBrowser browser = mediaBrowserListenableFuture.get();
                         justStarted.set(true);
+                        assert browser != null;
                         browser.setMediaItem(MappingUtil.mapInternetRadioStation(internetRadioStation));
                         browser.prepare();
                         browser.play();
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "startPodcast",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -288,75 +383,75 @@ public class MediaManager {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
                         MediaBrowser browser = mediaBrowserListenableFuture.get();
+                        if (browser == null) return;
                         justStarted.set(true);
                         browser.setMediaItem(MappingUtil.mapMediaItem(podcastEpisode));
                         browser.prepare();
                         browser.play();
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "startPodcast",e);
                 }
             }, MoreExecutors.directExecutor());
         }
+    }
+
+    public static void enqueue(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, List<Child> media, boolean playImmediatelyAfter, boolean switchImmediately) {
+        addListener(mediaBrowserListenableFuture, (f,browser)->{
+            if (playImmediatelyAfter && browser.getNextMediaItemIndex() != -1) {
+                getQueueRepository().insertAll(media, false, browser.getNextMediaItemIndex());
+                browser.addMediaItems(browser.getNextMediaItemIndex(), MappingUtil.mapMediaItems(media));
+            } else {
+                getQueueRepository().insertAll(media, false, browser.getMediaItemCount());
+                browser.addMediaItems(MappingUtil.mapMediaItems(media));
+            }
+            if(switchImmediately && browser.hasNextMediaItem()){
+                browser.seekToNext();
+                browser.prepare();
+                browser.play();
+            }
+        });
+    }
+
+    public static void enqueue(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, Child media, boolean playImmediatelyAfter, boolean switchImmediately) {
+        addListener(mediaBrowserListenableFuture, (f,browser)->{
+            if (playImmediatelyAfter && browser.getNextMediaItemIndex() != -1) {
+                getQueueRepository().insert(media, false, browser.getNextMediaItemIndex());
+                browser.addMediaItem(browser.getNextMediaItemIndex(), MappingUtil.mapMediaItem(media));
+            } else {
+                getQueueRepository().insert(media, false, browser.getMediaItemCount());
+                browser.addMediaItem(MappingUtil.mapMediaItem(media));
+            }
+            if(switchImmediately && browser.hasNextMediaItem()){
+                browser.seekToNext();
+                browser.prepare();
+                browser.play();
+            }
+        });
     }
 
     public static void enqueue(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, List<Child> media, boolean playImmediatelyAfter) {
-        if (mediaBrowserListenableFuture != null) {
-            mediaBrowserListenableFuture.addListener(() -> {
-                try {
-                    if (mediaBrowserListenableFuture.isDone()) {
-                        Log.e(TAG, "enqueue");
-                        MediaBrowser browser = mediaBrowserListenableFuture.get();
-                        if (playImmediatelyAfter && browser.getNextMediaItemIndex() != -1) {
-                            enqueueDatabase(media, false, browser.getNextMediaItemIndex());
-                            browser.addMediaItems(browser.getNextMediaItemIndex(), MappingUtil.mapMediaItems(media));
-                        } else {
-                            enqueueDatabase(media, false, mediaBrowserListenableFuture.get().getMediaItemCount());
-                            mediaBrowserListenableFuture.get().addMediaItems(MappingUtil.mapMediaItems(media));
-                        }
-                    }
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }, MoreExecutors.directExecutor());
-        }
+        enqueue(mediaBrowserListenableFuture, media, playImmediatelyAfter, false);
+    }
+    public static void enqueue(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, Child media, boolean playImmediatelyAfter) {
+        enqueue(mediaBrowserListenableFuture, media, playImmediatelyAfter, false);
     }
 
-    public static void enqueue(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, Child media, boolean playImmediatelyAfter) {
-        if (mediaBrowserListenableFuture != null) {
-            mediaBrowserListenableFuture.addListener(() -> {
-                try {
-                    if (mediaBrowserListenableFuture.isDone()) {
-                        Log.e(TAG, "enqueue");
-                        MediaBrowser browser = mediaBrowserListenableFuture.get();
-                        if (playImmediatelyAfter && browser.getNextMediaItemIndex() != -1) {
-                            enqueueDatabase(media, false, browser.getNextMediaItemIndex());
-                            browser.addMediaItem(browser.getNextMediaItemIndex(), MappingUtil.mapMediaItem(media));
-                        } else {
-                            enqueueDatabase(media, false, mediaBrowserListenableFuture.get().getMediaItemCount());
-                            mediaBrowserListenableFuture.get().addMediaItem(MappingUtil.mapMediaItem(media));
-                        }
-                    }
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }, MoreExecutors.directExecutor());
-        }
-    }
 
     public static void shuffle(ListenableFuture<MediaBrowser> mediaBrowserListenableFuture, List<Child> media, int startIndex, int endIndex) {
         if (mediaBrowserListenableFuture != null) {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        Log.e(TAG, "shuffle");
+                        Log.d(TAG, "shuffle");
                         MediaBrowser browser = mediaBrowserListenableFuture.get();
+                        assert browser != null;
                         browser.removeMediaItems(startIndex, endIndex + 1);
                         browser.addMediaItems(MappingUtil.mapMediaItems(media).subList(startIndex, endIndex + 1));
                         swapDatabase(media);
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "shuffle",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -367,12 +462,12 @@ public class MediaManager {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        Log.e(TAG, "swap");
-                        mediaBrowserListenableFuture.get().moveMediaItem(from, to);
+                        Log.d(TAG, "swap");
+                        Objects.requireNonNull(mediaBrowserListenableFuture.get()).moveMediaItem(from, to);
                         swapDatabase(media);
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "swap",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -384,15 +479,17 @@ public class MediaManager {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
                         Log.e(TAG, "remove");
-                        if (mediaBrowserListenableFuture.get().getMediaItemCount() > 1 && mediaBrowserListenableFuture.get().getCurrentMediaItemIndex() != toRemove) {
-                            mediaBrowserListenableFuture.get().removeMediaItem(toRemove);
+                        MediaBrowser mediaBrowser = mediaBrowserListenableFuture.get();
+                        assert  mediaBrowser != null;
+                        if (mediaBrowser.getMediaItemCount() > 1 && mediaBrowser.getCurrentMediaItemIndex() != toRemove) {
+                            mediaBrowser.removeMediaItem(toRemove);
                             removeDatabase(media, toRemove);
                         } else {
                             removeDatabase(media, -1);
                         }
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "remove medias",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -404,11 +501,11 @@ public class MediaManager {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
                         Log.e(TAG, "remove range");
-                        mediaBrowserListenableFuture.get().removeMediaItems(fromItem, toItem);
+                        Objects.requireNonNull(mediaBrowserListenableFuture.get()).removeMediaItems(fromItem, toItem);
                         removeRangeDatabase(media, fromItem, toItem);
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "remove range",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -419,10 +516,10 @@ public class MediaManager {
             mediaBrowserListenableFuture.addListener(() -> {
                 try {
                     if (mediaBrowserListenableFuture.isDone()) {
-                        callback.onRecovery(mediaBrowserListenableFuture.get().getCurrentMediaItemIndex());
+                        callback.onRecovery(Objects.requireNonNull(mediaBrowserListenableFuture.get()).getCurrentMediaItemIndex());
                     }
                 } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "getCurrentIndex",e);
                 }
             }, MoreExecutors.directExecutor());
         }
@@ -439,6 +536,7 @@ public class MediaManager {
 
     public static void scrobble(MediaItem mediaItem, boolean submission) {
         if (mediaItem != null && Preferences.isScrobblingEnabled()) {
+            assert mediaItem.mediaMetadata.extras != null;
             getSongRepository().scrobble(mediaItem.mediaMetadata.extras.getString("id"), submission);
         }
     }
@@ -460,7 +558,7 @@ public class MediaManager {
                                 new SessionToken(App.getContext(), new ComponentName(App.getContext(), MediaService.class))
                         ).buildAsync();
 
-                        enqueue(mediaBrowserListenableFuture, media, true);
+                        enqueue(mediaBrowserListenableFuture, media, true, false);
                     }
 
                     instantMix.removeObserver(this);
@@ -487,12 +585,8 @@ public class MediaManager {
         return new ChronologyRepository();
     }
 
-    private static void enqueueDatabase(List<Child> media, boolean reset, int afterIndex) {
-        getQueueRepository().insertAll(media, reset, afterIndex);
-    }
-
-    private static void enqueueDatabase(Child media, boolean reset, int afterIndex) {
-        getQueueRepository().insert(media, reset, afterIndex);
+    private static void enqueueDatabase(Child media) {
+        getQueueRepository().insert(media, true, 0);
     }
 
     private static void swapDatabase(List<Child> media) {

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -460,7 +461,7 @@ public class PlayerControllerFragment extends Fragment {
                 mediaBrowser.setRepeatMode(Preferences.getRepeatMode());
                 setMediaControllerListener(mediaBrowser);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "bindMediaController execution failed", e);
             }
         }, MoreExecutors.directExecutor());
     }

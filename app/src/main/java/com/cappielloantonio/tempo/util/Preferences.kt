@@ -6,6 +6,7 @@ import com.cappielloantonio.tempo.App
 import com.cappielloantonio.tempo.model.HomeSector
 import com.cappielloantonio.tempo.subsonic.models.OpenSubsonicExtension
 import com.google.gson.Gson
+import androidx.core.content.edit
 
 
 object Preferences {
@@ -84,16 +85,16 @@ object Preferences {
     private const val SORT_SEARCH_CHRONOLOGICALLY= "sort_search_chronologically"
     private const val ARTIST_DISPLAY_BIOGRAPHY= "artist_display_biography"
 
-    private const val FIRST_LAUNCH = "first_launch"
+    private const val CURRENT_PUASED_FLAG = "CURRENT_PUASED_FLAG"
 
     @JvmStatic
-    fun isFirstLaunch(): Boolean {
-        return App.getInstance().preferences.getBoolean(FIRST_LAUNCH, true)
+    fun isPaused(): Boolean {
+        return App.getInstance().preferences.getBoolean(CURRENT_PUASED_FLAG, true)
     }
 
     @JvmStatic
-    fun setFirstLaunch(value: Boolean) {
-        App.getInstance().preferences.edit().putBoolean(FIRST_LAUNCH, value).apply()
+    fun setIsPaused(value: Boolean) {
+        App.getInstance().preferences.edit { putBoolean(CURRENT_PUASED_FLAG, value) }
     }
 
     @JvmStatic

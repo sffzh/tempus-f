@@ -16,6 +16,7 @@ import com.cappielloantonio.tempo.subsonic.models.Child;
 import com.cappielloantonio.tempo.subsonic.models.PlayQueue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public class QueueRepository {
                     .collect(Collectors.toList());
 
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "getMedia", e);
         }
 
         return media;
@@ -107,6 +108,11 @@ public class QueueRepository {
                 });
     }
 
+    @Deprecated
+    public void insert(boolean reset, int afterIndex,Child media) {
+        insert(media, reset, afterIndex);
+    }
+
     public void insert(Child media, boolean reset, int afterIndex) {
         try {
             List<Queue> mediaList = new ArrayList<>();
@@ -123,7 +129,7 @@ public class QueueRepository {
             Queue queueItem = new Queue(media);
             mediaList.add(afterIndex, queueItem);
 
-            for (int i = 0; i < mediaList.size(); i++) {
+            for (int i = afterIndex; i < mediaList.size(); i++) {
                 mediaList.get(i).setTrackOrder(i);
             }
 
@@ -135,44 +141,58 @@ public class QueueRepository {
             insertAll.start();
             insertAll.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "insert", e);
         }
     }
 
-    private boolean isMediaInQueue(List<Queue> queue, Child media) {
-        if (queue == null || media == null) return false;
-        return queue.stream().anyMatch(queueItem ->
-                queueItem != null && media.getId() != null &&
-                        queueItem.getId().equals(media.getId())
-        );
-    }
-
     public void insertAll(List<Child> toAdd, boolean reset, int afterIndex) {
-        try {
-            List<Queue> media = new ArrayList<>();
 
-            if (!reset) {
+        try {
+            List<Queue> media;
+
+            if (reset) {
+                media = new ArrayList<>(toAdd.size());
+                for (int i = 0;i< toAdd.size();i ++ ) {
+                    Queue item = new Queue(toAdd.get(i));
+                    item.setTrackOrder(i);
+                    media.add(item);
+                }
+            }else {
                 GetMediaThreadSafe getMediaThreadSafe = new GetMediaThreadSafe(queueDao);
                 Thread getMediaThread = new Thread(getMediaThreadSafe);
                 getMediaThread.start();
                 getMediaThread.join();
 
                 media = getMediaThreadSafe.getMedia();
+
+                HashSet<String> existingIds = new HashSet<>(toAdd.size());
+                List<Queue> newAddItems = new ArrayList<>(toAdd.size());
+
+                int trackIndex = afterIndex;
+                for(Child item :toAdd){
+                    existingIds.add(item.getId());
+                    Queue queue = new Queue(item);
+                    queue.setTrackOrder(trackIndex);
+                    trackIndex ++ ;
+                    newAddItems.add(queue);
+                }
+
+                List<Queue> tails = new ArrayList<>(media.size() - afterIndex);
+                for (int i = afterIndex;i< media.size();i++){
+                    if(!existingIds.contains(media.get(i).getId())){
+                        media.get(i).setTrackOrder(trackIndex);
+                        trackIndex ++ ;
+                        tails.add(media.get(i));
+                    }
+                }
+
+                media.subList(afterIndex, media.size()).clear();
+                media.addAll(newAddItems);
+                media.addAll(tails);
             }
 
-            List<Child> filteredToAdd = toAdd;
-            final List<Queue> finalMedia = media;
-            filteredToAdd = toAdd.stream()
-                    .filter(child -> !isMediaInQueue(finalMedia, child))
-                    .collect(Collectors.toList());
-
-            for (int i = 0; i < filteredToAdd.size(); i++) {
-                Queue queueItem = new Queue(filteredToAdd.get(i));
-                media.add(afterIndex + i, queueItem);
-            }
-
-            for (int i = 0; i < media.size(); i++) {
-                media.get(i).setTrackOrder(i);
+            for(Queue q:media){
+                Log.d(TAG, "insertAll: " + q.getId()  +">-"+ q.getTrackOrder()+">-"+ q.getTitle());
             }
 
             Thread delete = new Thread(new DeleteAllThreadSafe(queueDao));
@@ -183,7 +203,7 @@ public class QueueRepository {
             insertAll.start();
             insertAll.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "insertAll", e);
         }
     }
 
@@ -210,7 +230,7 @@ public class QueueRepository {
             thread.join();
             count = countThread.getCount();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "count", e);
         }
 
         return count;
@@ -240,7 +260,7 @@ public class QueueRepository {
             Queue lastMediaPlayed = getLastPlayedMediaThreadSafe.getQueueItem();
             index = lastMediaPlayed.getTrackOrder();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "getLastPlayedMediaIndex", e);
         }
 
         return index;
@@ -258,7 +278,7 @@ public class QueueRepository {
             Queue lastMediaPlayed = getLastPlayedMediaThreadSafe.getQueueItem();
             timestamp = lastMediaPlayed.getPlayingChanged();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TAG, "getLastPlayedMediaTimestamp", e);
         }
 
         return timestamp;

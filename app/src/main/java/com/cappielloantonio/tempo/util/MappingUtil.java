@@ -19,6 +19,7 @@ import com.cappielloantonio.tempo.repository.DownloadRepository;
 import com.cappielloantonio.tempo.subsonic.models.Child;
 import com.cappielloantonio.tempo.subsonic.models.InternetRadioStation;
 import com.cappielloantonio.tempo.subsonic.models.PodcastEpisode;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
@@ -85,8 +86,8 @@ public class MappingUtil {
             bundle.putInt("originalWidth", media.getOriginalWidth() != null ? media.getOriginalWidth() : 0);
             bundle.putInt("originalHeight", media.getOriginalHeight() != null ? media.getOriginalHeight() : 0);
             bundle.putString("uri", uri.toString());
-            
-            bundle.putString("assetLinkSong", media.getId() != null ? AssetLinkUtil.buildLink(AssetLinkUtil.TYPE_SONG, media.getId()) : null);
+
+            bundle.putString("assetLinkSong", AssetLinkUtil.buildLink(AssetLinkUtil.TYPE_SONG, media.getId()));
             bundle.putString("assetLinkAlbum", media.getAlbumId() != null ? AssetLinkUtil.buildLink(AssetLinkUtil.TYPE_ALBUM, media.getAlbumId()) : null);
             bundle.putString("assetLinkArtist", media.getArtistId() != null ? AssetLinkUtil.buildLink(AssetLinkUtil.TYPE_ARTIST, media.getArtistId()) : null);
             bundle.putString("assetLinkGenre", AssetLinkUtil.buildLink(AssetLinkUtil.TYPE_GENRE, media.getGenre()));
@@ -307,7 +308,7 @@ public class MappingUtil {
 
     private static Uri getDownloadUri(String id) {
         Download download = new DownloadRepository().getDownload(id);
-        return download != null && !download.getDownloadUri().isEmpty() ? Uri.parse(download.getDownloadUri()) : MusicUtil.getDownloadUri(id);
+        return download != null && !Strings.isNullOrEmpty(download.getDownloadUri()) ? Uri.parse(download.getDownloadUri()) : MusicUtil.getDownloadUri(id);
     }
 
     public static void observeExternalAudioRefresh(LifecycleOwner owner, Runnable onRefresh) {

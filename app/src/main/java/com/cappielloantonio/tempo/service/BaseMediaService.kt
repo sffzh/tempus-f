@@ -164,19 +164,19 @@ open class BaseMediaService : MediaLibraryService() {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 Log.d(javaClass.toString(), "onIsPlayingChanged " + player.currentMediaItemIndex)
-                if (!isPlaying) {
+                if (isPlaying) {
+                    MediaManager.scrobble(player.currentMediaItem, false)
+                    scheduleWidgetUpdates()
+                    Preferences.setIsPaused(false)
+                }else{
                     MediaManager.setPlayingPausedTimestamp(
                         player.currentMediaItem,
                         player.currentPosition
                     )
-                } else {
-                    MediaManager.scrobble(player.currentMediaItem, false)
-                }
-                if (isPlaying) {
-                    scheduleWidgetUpdates()
-                } else {
                     stopWidgetUpdates()
+
                 }
+                Preferences.setIsPaused(!isPlaying)
                 updateWidget(player)
             }
 

@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,15 +27,18 @@ import com.cappielloantonio.tempo.helper.recyclerview.CustomLinearSnapHelper;
 import com.cappielloantonio.tempo.interfaces.ClickCallback;
 import com.cappielloantonio.tempo.service.MediaManager;
 import com.cappielloantonio.tempo.service.MediaService;
+import com.cappielloantonio.tempo.subsonic.models.Child;
 import com.cappielloantonio.tempo.ui.activity.MainActivity;
 import com.cappielloantonio.tempo.ui.adapter.AlbumAdapter;
 import com.cappielloantonio.tempo.ui.adapter.ArtistAdapter;
 import com.cappielloantonio.tempo.ui.adapter.SongHorizontalAdapter;
 import com.cappielloantonio.tempo.util.Constants;
+import com.cappielloantonio.tempo.util.Preferences;
 import com.cappielloantonio.tempo.viewmodel.PlaybackViewModel;
 import com.cappielloantonio.tempo.viewmodel.SearchViewModel;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 @UnstableApi
@@ -254,7 +258,7 @@ public class SearchFragment extends Fragment implements ClickCallback {
     }
 
     private boolean isQueryValid(String query) {
-        return !query.equals("") && query.trim().length() > 1;
+        return !query.isEmpty() && query.trim().length() > 1;
     }
 
     private void inputFocus() {
@@ -271,7 +275,11 @@ public class SearchFragment extends Fragment implements ClickCallback {
 
     @Override
     public void onMediaClick(Bundle bundle) {
-        MediaManager.startQueue(mediaBrowserListenableFuture, bundle.getParcelableArrayList(Constants.TRACKS_OBJECT), bundle.getInt(Constants.ITEM_POSITION));
+        if (Preferences.isShuffleModeEnabled()){
+            MediaManager.startQueue(mediaBrowserListenableFuture, MediaManager.getTracks(bundle), bundle.getInt(Constants.ITEM_POSITION));
+        }else{
+            MediaManager.enqueue(mediaBrowserListenableFuture, MediaManager.getTrackItem(bundle), true, true);
+        }
         songHorizontalAdapter.notifyDataSetChanged();
         activity.setBottomSheetInPeek(true);
     }
