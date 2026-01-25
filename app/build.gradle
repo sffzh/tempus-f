@@ -9,6 +9,7 @@ plugins {
 
 def props = new Properties()
 def propFile = rootProject.file('local.properties')
+def isCI = System.getenv("CI") == "true"
 if (propFile.exists()) {
     props.load(new FileInputStream(propFile))
 }
@@ -89,11 +90,11 @@ android {
     productFlavors {
         tempus {
             dimension = "default"
-            applicationId 'cn.sffzh.tempus'
+            applicationId 'cn.sffzh.tempus-f'
         }
         degoogled {
             dimension = "default"
-            applicationId "cn.sffzh.degoogled.tempus"
+            applicationId "cn.sffzh.degoogled.tempus-f"
         }
     }
 
@@ -104,13 +105,22 @@ android {
                 storePassword props['RELEASE_STORE_PASSWORD']
                 keyAlias props['RELEASE_KEY_ALIAS']
                 keyPassword props['RELEASE_KEY_PASSWORD']
+            }else { // CI 构建：禁用所有签名
+                enableV1Signing = false
+                enableV2Signing = false
+                enableV3Signing = false
+                enableV4Signing = false
             }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.release
+            if (!isCI) {
+                signingConfig = signingConfigs.release
+            } else { // CI 环境不使用 signingConfig
+                signingConfig = null
+            }
             shrinkResources = true
             minifyEnabled = true
             debuggable = false
