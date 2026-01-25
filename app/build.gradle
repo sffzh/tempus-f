@@ -26,7 +26,7 @@ android {
         manifestPlaceholders["HARMONYOS_SUPPORT"] = "true"
 
         versionCode 26012501
-        versionName '1.0.0.26012501'
+        versionName '1.0.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         javaCompileOptions {
@@ -50,7 +50,7 @@ android {
         onVariants(selector().all()) { variant ->
             variant.outputs.each { output ->
                 def versionName = output.versionName.get()
-//                def versionCode = output.versionCode.get()
+                def versionCode = output.versionCode.get()
                 def buildType = variant.buildType
                 def flavorName = variant.flavorName ?: ""
                 def flavorPart = flavorName ? "${flavorName}-" : ""
@@ -59,7 +59,7 @@ android {
                 def abiPart = abi ? "${abi.identifier}-" : ""
 
                 output.outputFileName.set(
-                        "Tempus-F-${flavorPart}${buildType}-${abiPart}v${versionName}.apk"
+                        "Tempus-F-${flavorPart}${buildType}-${abiPart}v${versionName}.${versionCode}.apk"
                 )
             }
         }
