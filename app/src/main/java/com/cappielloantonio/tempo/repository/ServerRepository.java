@@ -1,6 +1,7 @@
 package com.cappielloantonio.tempo.repository;
 
 import androidx.lifecycle.LiveData;
+import androidx.media3.common.util.UnstableApi;
 
 import com.cappielloantonio.tempo.database.AppDatabase;
 import com.cappielloantonio.tempo.database.dao.ServerDao;
@@ -8,6 +9,7 @@ import com.cappielloantonio.tempo.model.Server;
 
 import java.util.List;
 
+@UnstableApi
 public class ServerRepository {
     private static final String TAG = "QueueRepository";
 

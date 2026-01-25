@@ -5,7 +5,9 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="C:\Users\ryan\scoop\apps\gradle\current" />
         <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
@@ -13,8 +15,9 @@
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
+        <option name="resolveExternalAnnotations" value="true" />
       </GradleProjectSettings>
     </option>
+    <option name="parallelModelFetch" value="true" />
   </component>
 </project>

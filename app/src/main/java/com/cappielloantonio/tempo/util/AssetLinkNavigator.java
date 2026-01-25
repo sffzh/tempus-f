@@ -5,9 +5,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.media3.common.util.UnstableApi;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 
@@ -22,9 +24,11 @@ import com.cappielloantonio.tempo.subsonic.models.Child;
 import com.cappielloantonio.tempo.subsonic.models.Playlist;
 import com.cappielloantonio.tempo.subsonic.models.Genre;
 import com.cappielloantonio.tempo.ui.activity.MainActivity;
+import com.cappielloantonio.tempo.ui.activity.base.BaseActivity;
 import com.cappielloantonio.tempo.ui.fragment.bottomsheetdialog.SongBottomSheetDialog;
 import com.cappielloantonio.tempo.viewmodel.SongBottomSheetViewModel;
 
+@UnstableApi
 public final class AssetLinkNavigator {
     private final MainActivity activity;
     private final SongRepository songRepository = new SongRepository();
@@ -68,6 +72,7 @@ public final class AssetLinkNavigator {
     private void openSong(@NonNull String id) {
         MutableLiveData<Child> liveData = songRepository.getSong(id);
         Observer<Child> observer = new Observer<Child>() {
+            @OptIn(markerClass = UnstableApi.class)
             @Override
             public void onChanged(Child child) {
                 liveData.removeObserver(this);
@@ -173,9 +178,6 @@ public final class AssetLinkNavigator {
     private void navigateSafely(int destinationId, @Nullable Bundle args) {
         activity.runOnUiThread(() -> {
             NavController navController = activity.navController;
-            if (navController == null) {
-                return;
-            }
             if (navController.getCurrentDestination() != null
                     && navController.getCurrentDestination().getId() == destinationId) {
                 navController.navigate(destinationId, args, new NavOptions.Builder().setLaunchSingleTop(true).build());

@@ -16,6 +16,7 @@ import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.offline.DownloadService;
 import androidx.media3.session.MediaBrowser;
 import androidx.media3.session.SessionToken;
+import androidx.navigation.NavController;
 
 import com.cappielloantonio.tempo.service.DownloaderService;
 import com.cappielloantonio.tempo.service.MediaService;
@@ -26,7 +27,7 @@ import com.google.android.material.elevation.SurfaceColors;
 import com.google.common.util.concurrent.ListenableFuture;
 
 @UnstableApi
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAG = "BaseActivity";
 
     private ListenableFuture<MediaBrowser> mediaBrowserListenableFuture;

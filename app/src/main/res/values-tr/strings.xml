@@ -28,7 +28,7 @@
     <string name="album_page_release_dates_label">%1$s tarihinde yayınlandı, orijinali %2$s</string>
     <string name="album_page_shuffle_button">Karıştır</string>
     <string name="album_page_tracks_count_and_duration">%1$d parça  •  %2$d dakika</string>
-    <string name="app_name">Tempus</string>
+    <string name="app_name">Tempus-F</string>
     <string name="artist_adapter_radio_station_starting">Aranıyor…</string>
     <string name="artist_bottom_sheet_instant_mix">Anında karışım</string>
     <string name="artist_bottom_sheet_shuffle">Karıştır</string>
@@ -275,16 +275,16 @@
     <string name="settings_about_title">Hakkında</string>
     <string name="settings_always_on_display">Her zaman açık ekran</string>
     <string name="settings_audio_transcode_download_format">Dönüştürme formatı</string>
-    <string name="settings_audio_transcode_download_priority_summary">Etkinleştirildiğinde, Tempus parçayı aşağıdaki dönüştürme ayarlarıyla indirmeye zorlamaz.</string>
+    <string name="settings_audio_transcode_download_priority_summary">Etkinleştirildiğinde, Tempus-F parçayı aşağıdaki dönüştürme ayarlarıyla indirmeye zorlamaz.</string>
     <string name="settings_audio_transcode_download_priority_title">İndirmelerde yayın için kullanılan sunucu ayarlarına öncelik ver</string>
-    <string name="settings_audio_transcode_download_summary">Etkinleştirildiğinde, Tempus dönüştürülmüş parçaları indirir.</string>
+    <string name="settings_audio_transcode_download_summary">Etkinleştirildiğinde, Tempus-F dönüştürülmüş parçaları indirir.</string>
     <string name="settings_audio_transcode_download_title">Dönüştürülmüş parçaları indir</string>
     <string name="settings_audio_transcode_estimate_content_length_summary">Etkinleştirildiğinde, parçanın tahmini süresi sunucudan istenir.</string>
     <string name="settings_audio_transcode_estimate_content_length_title">İçerik uzunluğunu tahmin et</string>
     <string name="settings_audio_transcode_format_download">İndirmeler için dönüştürme formatı</string>
     <string name="settings_audio_transcode_format_mobile">Mobilde dönüştürme formatı</string>
     <string name="settings_audio_transcode_format_wifi">Wi-Fi’da dönüştürme formatı</string>
-    <string name="settings_audio_transcode_priority_summary">Etkinleştirildiğinde, Tempus parçayı aşağıdaki dönüştürme ayarlarıyla yayınlamayacaktır.</string>
+    <string name="settings_audio_transcode_priority_summary">Etkinleştirildiğinde, Tempus-F parçayı aşağıdaki dönüştürme ayarlarıyla yayınlamayacaktır.</string>
     <string name="settings_audio_transcode_priority_title">Sunucu dönüştürme ayarlarına öncelik ver</string>
     <string name="settings_audio_transcode_priority_toast">Parçanın dönüştürülmesinde öncelik sunucuya verildi</string>
     <string name="settings_buffering_strategy">Önbellekleme stratejisi</string>
@@ -442,7 +442,7 @@
     <string name="undraw_thanks">İllüstrasyonlarıyla bu uygulamayı daha güzel hale getirmemize yardımcı olan unDraw’a özel teşekkürler.</string>
     <string name="undraw_url">https://undraw.co/</string>
     <string name="home_sync_starred_albums_title">Yıldızlı Albümleri Senkronize Et</string>
-    <string name="widget_label">Tempus Widget</string>
+    <string name="widget_label">Tempus-F Widget</string>
     <string name="widget_not_playing">Şu an oynatılmıyor</string>
     <string name="widget_placeholder_subtitle">Tempus’yu aç</string>
     <string name="widget_time_elapsed_placeholder">0:00</string>

@@ -45,7 +45,7 @@ jobs:
       - name: Create Artifact Staging Directory
         run: mkdir -p release-artifacts
 
-      - name: Sign Tempus Release APKs
+      - name: Sign Tempus-F Release APKs
         id: sign_tempus_release
         uses: r0adkll/sign-android-release@v1
         with:
@@ -57,7 +57,7 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
-      - name: Prepare Signed Tempus APKs for Release
+      - name: Prepare Signed Tempus-F APKs for Release
         run: |
           TEMPUS_PATH=app/build/outputs/apk/tempus/release
           
@@ -101,11 +101,15 @@ jobs:
           
           # Renaming 64-bit APK and moving to safe staging directory
           find $DEGOOGLED_PATH -name '*arm64-v8a*signed.apk' -print0 | xargs -0 mv -t ./release-artifacts/
-          mv ./release-artifacts/*arm64-v8a*signed.apk ./release-artifacts/app-degoogled-arm64-v8a-release.apk
+          # mv ./release-artifacts/*arm64-v8a*signed.apk ./release-artifacts/app-degoogled-arm64-v8a-release.apk
           
           # Renaming 32-bit APK and moving to safe staging directory
           find $DEGOOGLED_PATH -name '*armeabi-v7a*signed.apk' -print0 | xargs -0 mv -t ./release-artifacts/
-          mv ./release-artifacts/*armeabi-v7a*signed.apk ./release-artifacts/app-degoogled-armeabi-v7a-release.apk
+          # mv ./release-artifacts/*armeabi-v7a*signed.apk ./release-artifacts/app-degoogled-armeabi-v7a-release.apk
+          
+          # Renaming x86_64 APK and moving to safe staging directory
+          find $DEGOOGLED_PATH -name '*x86_64*signed.apk' -print0 | xargs -0 mv -t ./release-artifacts/
+          # mv ./release-artifacts/*x86_64*signed.apk ./release-artifacts/app-degoogled-x86_64-release.apk
           
           echo "Prepared Degoogled APKs."
           ls -la ./release-artifacts/

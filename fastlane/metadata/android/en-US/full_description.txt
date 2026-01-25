@@ -1,4 +1,4 @@
-Tempus is an open-source and lightweight music client for Subsonic, designed and built natively for Android. It provides a seamless and intuitive music streaming experience, allowing you to access and play your Subsonic music library directly from your Android device.
+Tempus-F is an open-source and lightweight music client for Subsonic/Navidrome, designed and built natively for Android. It provides a seamless and intuitive music streaming experience, allowing you to access and play your Subsonic/Navidrome music library directly from your Android device.
 
 Features
 

@@ -156,10 +156,7 @@ public class LoginFragment extends Fragment implements ClickCallback {
     private void resetServerPreference() {
         Preferences.setServerId(null);
         Preferences.setServer(null);
-        Preferences.setUser(null);
-        Preferences.setPassword(null);
-        Preferences.setToken(null);
-        Preferences.setSalt(null);
+        Preferences.clearLogin();
         Preferences.setLowSecurity(false);
 
         App.getSubsonicClientInstance(true);

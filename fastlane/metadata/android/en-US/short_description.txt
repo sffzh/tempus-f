@@ -1,1 +1,1 @@
-An open-source and lightweight music client for Subsonic
+An open-source and lightweight music client for Subsonic / Navidrome

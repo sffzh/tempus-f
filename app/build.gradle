@@ -1,3 +1,4 @@
+import com.android.build.api.variant.FilterConfiguration
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -13,8 +14,8 @@ if (propFile.exists()) {
 }
 
 android {
-    namespace 'com.cappielloantonio.tempo'
-    compileSdk 36
+    namespace = 'com.cappielloantonio.tempo'
+    compileSdk = 36
     buildToolsVersion = '36.0.0'
 
     defaultConfig {
@@ -23,8 +24,8 @@ android {
 
         manifestPlaceholders["HARMONYOS_SUPPORT"] = "true"
 
-        versionCode 26012202
-        versionName '4.6.4.26012202'
+        versionCode 26012501
+        versionName '1.0.0.26012501'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         javaCompileOptions {
@@ -44,13 +45,37 @@ android {
         }
     }
 
+    androidComponents {
+        onVariants(selector().all()) { variant ->
+            variant.outputs.each { output ->
+                def versionName = output.versionName.get()
+//                def versionCode = output.versionCode.get()
+                def buildType = variant.buildType
+                def flavorName = variant.flavorName ?: ""
+                def flavorPart = flavorName ? "${flavorName}-" : ""
+                // 获取 ABI（如果是 universal 则为 null）
+                def abi = output.getFilter(FilterConfiguration.FilterType.ABI)
+                def abiPart = abi ? "${abi.identifier}-" : ""
+
+                output.outputFileName.set(
+                        "Tempus-F-${flavorPart}${buildType}-${abiPart}v${versionName}.apk"
+                )
+            }
+        }
+    }
+
+
     splits {
         abi {
-            enable true
+            enable = true
             reset()
 //            include 'arm64-v8a'
-            include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
-            universalApk false
+            if (props['RELEASE_ABI']) {
+                include(props['RELEASE_ABI'].split(','))
+            } else {
+                include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            }
+            universalApk = false
         }
     }
 
@@ -85,10 +110,10 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
-            shrinkResources true
-            minifyEnabled true
-            debuggable false
+            signingConfig = signingConfigs.release
+            shrinkResources = true
+            minifyEnabled = true
+            debuggable = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -110,8 +135,8 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
-        buildConfig true
+        viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -125,13 +150,16 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.room:room-runtime:2.8.4'
     implementation 'androidx.core:core-splashscreen:1.2.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation "androidx.media:media:1.7.1"
     implementation 'androidx.core:core:1.17.0'
     implementation 'androidx.core:core-ktx:1.17.0'
     implementation "androidx.dynamicanimation:dynamicanimation:1.1.0"
     implementation "androidx.documentfile:documentfile:1.1.0"
-    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation "androidx.security:security-crypto:1.1.0"
+    implementation("androidx.datastore:datastore-preferences:1.2.0")
+
+    implementation("com.google.crypto.tink:tink-android:1.20.0")
 
     // Material & Glide
     implementation 'com.google.android.material:material:1.13.0'

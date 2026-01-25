@@ -5,6 +5,7 @@ import android.util.Log;
 import com.cappielloantonio.tempo.github.Github;
 import com.cappielloantonio.tempo.github.GithubRetrofitClient;
 import com.cappielloantonio.tempo.github.models.LatestRelease;
+import com.cappielloantonio.tempo.subsonic.RetrofitManager;
 
 import retrofit2.Call;
 
@@ -14,7 +15,8 @@ public class ReleaseClient {
     private final ReleaseService releaseService;
 
     public ReleaseClient(Github github) {
-        this.releaseService = new GithubRetrofitClient(github).getRetrofit().create(ReleaseService.class);
+        this.releaseService = RetrofitManager.createService(github.getUrl(), ReleaseService.class);
+//        this.releaseService = new GithubRetrofitClient(github).getRetrofit().create(ReleaseService.class);
     }
 
     public Call<LatestRelease> getLatestRelease() {

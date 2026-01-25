@@ -49,7 +49,7 @@
     <string name="artist_page_title_most_streamed_song_section">最常播放的歌曲</string>
     <string name="artist_page_title_most_streamed_song_see_all_button">查看全部</string>
     <string name="asset_link_chip_text">%1$s • %2$s</string>
-    <string name="asset_link_clipboard_label">Tempus 资源链接</string>
+    <string name="asset_link_clipboard_label">Tempus-F 资源链接</string>
     <string name="asset_link_copied_toast">已将 %1$s 复制到剪贴板</string>
     <string name="asset_link_debug_toast">资源链接：%1$s</string>
     <string name="asset_link_error_album">无法打开该专辑</string>
@@ -336,7 +336,7 @@
     <string name="server_unreachable_dialog_positive_button">仍然继续</string>
     <string name="server_unreachable_dialog_summary">请求的服务器不可用。 如果您选择继续，此对话框在接下来的一个小时内将不会再次出现。</string>
     <string name="server_unreachable_dialog_title">服务器无法访问</string>
-    <string name="settings_about_summary">Tempus 是 Subsonic 的开源轻量级音乐客户端，专为 Android 设计和构建。</string>
+    <string name="settings_about_summary">光阴(Tempus-F) 是 Subsonic 的开源轻量级音乐客户端，专为 Android 设计和构建。</string>
     <string name="settings_about_title">关于</string>
     <string name="settings_album_detail">显示专辑详情</string>
     <string name="settings_album_detail_summary">启用后将在专辑页显示流派、歌曲数量等信息</string>
@@ -350,16 +350,16 @@
     <string name="settings_audio_quality">显示音频质量</string>
     <string name="settings_audio_quality_summary">显示歌曲的码率和音频格式。</string>
     <string name="settings_audio_transcode_download_format">转码格式</string>
-    <string name="settings_audio_transcode_download_priority_summary">启用后 Tempus 将不会强制使用下面的转码设置下载歌曲。</string>
+    <string name="settings_audio_transcode_download_priority_summary">启用后 Tempus-F 将不会强制使用下面的转码设置下载歌曲。</string>
     <string name="settings_audio_transcode_download_priority_title">优先考虑服务器上用于流式传输的设置</string>
-    <string name="settings_audio_transcode_download_summary">启用后 Tempus 将下载转码后的歌曲。</string>
+    <string name="settings_audio_transcode_download_summary">启用后 Tempus-F 将下载转码后的歌曲。</string>
     <string name="settings_audio_transcode_download_title">下载转码后的歌曲</string>
     <string name="settings_audio_transcode_estimate_content_length_summary">启用后将发送请求到服务器以查询歌曲的估计持续时间。</string>
     <string name="settings_audio_transcode_estimate_content_length_title">估计内容长度</string>
     <string name="settings_audio_transcode_format_download">用于下载的转码格式</string>
     <string name="settings_audio_transcode_format_mobile">移动数据下的转码格式</string>
     <string name="settings_audio_transcode_format_wifi">Wi-Fi 下的转码格式</string>
-    <string name="settings_audio_transcode_priority_summary">启用后 Tempus 将不会强制使用下面的转码设置流式传输歌曲。</string>
+    <string name="settings_audio_transcode_priority_summary">启用后 Tempus-F 将不会强制使用下面的转码设置流式传输歌曲。</string>
     <string name="settings_audio_transcode_priority_title">优先考虑服务器转码设置</string>
     <string name="settings_audio_transcode_priority_toast">歌曲转码设置优先级设置为服务器</string>
     <string name="settings_auto_download_lyrics">自动下载歌词</string>
@@ -397,6 +397,8 @@
     <string name="settings_music_directory_summary">启用后则显示音乐目录部分。 请注意，要使文件夹导航正常工作，服务器必须支持此功能。</string>
     <string name="settings_podcast">显示播客</string>
     <string name="settings_podcast_summary">启用后则显示播客部分。</string>
+    <string name="settings_playlist_sort">播放列表排序方式</string>
+
     <string name="settings_queue_syncing_countdown">同步定时器</string>
     <string name="settings_queue_syncing_summary">启用后将允许当前用户保存其播放队列，并能够在打开应用程序时加载保存状态。</string>
     <string name="settings_queue_syncing_title">同步当前用户的播放队列</string>
@@ -543,7 +545,7 @@
     <string name="widget_content_desc_prev">上一首</string>
     <string name="widget_content_desc_repeat">更改循环模式</string>
     <string name="widget_content_desc_shuffle">切换随机播放</string>
-    <string name="widget_label">Tempus 小组件</string>
+    <string name="widget_label">Tempus-F 小组件</string>
     <string name="widget_not_playing">未播放</string>
     <string name="widget_placeholder_subtitle">打开 Tempus</string>
     <string name="widget_time_duration_placeholder">0:00</string>

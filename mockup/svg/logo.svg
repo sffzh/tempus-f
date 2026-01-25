@@ -1,0 +1,22 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>tempus.f</title>
+  <!-- #1E88E5 -->
+  <rect id="svg_1" fill="#B0B0B0" ry="80" rx="80" height="480" width="480" y="15" x="13"/>
+  <circle id="svg_2" fill="#111111" r="170" cy="256" cx="254"/>
+  <circle id="svg_3" fill="#181818" r="135" cy="256" cx="254"/>
+  <circle id="svg_4" fill="#E53935" r="70" cy="256" cx="254"/>
+  <circle id="svg_5" fill="#252525" r="10" cy="256" cx="254"/>
+  <ellipse ry="42.5" rx="42.5" id="svg_15" cy="117.5" cx="394.5" fill="#999999"/>
+  <circle id="svg_13" opacity="0.4" stroke-width="1.2" stroke="#222222" fill="none" r="95" cy="256" cx="254"/>
+  <circle id="svg_12" opacity="0.5" stroke-width="1.5" stroke="#222222" fill="none" r="120" cy="255" cx="254"/>
+  <circle id="svg_6" r="17.5" cy="117.5" cx="394.5" fill="#1E88E5"/>
+  <path id="svg_7" stroke-linecap="round" fill="none" stroke-width="13" stroke="#1E88E5" d="m393,124c-47,8 -45,76 -47,138c0,0 -2,93 -60,90"/>
+  <!--
+  <path d="m329.92509,218.1844l43.69745,0l0,0c5.72449,0 10.3651,4.92487 10.3651,11c0,6.07513 -4.64061,11 -10.3651,11l-43.69745,0l0,0c-5.72448,0 -10.3651,-4.92487 -10.3651,-11c0,-6.07514 4.64061,-11 10.3651,-11z" id="svg_14" fill="#1E88E5" transform="translate(1,0)"/>
+  -->
+  <!-- 心电图折线 -->
+  <polyline fill="none" stroke="#B8874D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="327,254 336.5999755859375,254 341.4000244140625,234 343.800048828125,274 346.199951171875,214 349.800048828125,284 353.4000244140625,254 363,254 367.800048828125,244 372.5999755859375,264 377.4000244140625,254 387,254 391.800048828125,234 394.199951171875,274 396.5999755859375,224 400.199951171875,284 403.800048828125,254 413.4000244140625,254 423,254 " id="svg_8"/>
+ </g>
+
+</svg>
