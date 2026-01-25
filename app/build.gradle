@@ -10,6 +10,8 @@ plugins {
 def props = new Properties()
 def propFile = rootProject.file('local.properties')
 def isCI = System.getenv("CI") == "true"
+def isFDroid = System.getenv("FDROID") == "1" // F‑Droid 构建标识
+
 if (propFile.exists()) {
     props.load(new FileInputStream(propFile))
 }
@@ -26,7 +28,7 @@ android {
         manifestPlaceholders["HARMONYOS_SUPPORT"] = "true"
 
         versionCode 26012501
-        versionName '1.0.0'
+        versionName '1.0.26012501'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         javaCompileOptions {
@@ -68,15 +70,19 @@ android {
 
     splits {
         abi {
-            enable = true
-            reset()
-//            include 'arm64-v8a'
-            if (props['RELEASE_ABI']) {
-                include(props['RELEASE_ABI'].split(','))
-            } else {
-                include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            if (isFDroid) {
+                enable = false
+                universalApk = true
+            }else{
+                enable = true
+                reset()
+                if (props['RELEASE_ABI']) {
+                    include(props['RELEASE_ABI'].split(','))
+                } else {
+                    include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+                }
+                universalApk = false
             }
-            universalApk = false
         }
     }
 
@@ -90,17 +96,17 @@ android {
     productFlavors {
         tempus {
             dimension = "default"
-            applicationId 'cn.sffzh.tempus-f'
+            applicationId 'cn.sffzh.tempus_f'
         }
         degoogled {
             dimension = "default"
-            applicationId "cn.sffzh.degoogled.tempus-f"
+            applicationId "cn.sffzh.degoogled.tempus_f"
         }
     }
 
     signingConfigs {
         release {
-            if (props['RELEASE_KEY_STORE_FILE']) {
+            if (!isCI && props['RELEASE_KEY_STORE_FILE']) {
                 storeFile file(props['RELEASE_KEY_STORE_FILE'])
                 storePassword props['RELEASE_STORE_PASSWORD']
                 keyAlias props['RELEASE_KEY_ALIAS']

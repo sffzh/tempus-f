@@ -1,0 +1,38 @@
+Categories:
+  - Music
+  - Internet
+  - Audio
+License: GPL-3.0-only
+AuthorName: sffzh
+WebSite: https://github.com/sffzh/tempus-f
+SourceCode: https://github.com/sffzh/tempus-f
+IssueTracker: https://github.com/sffzh/tempus-f/issues
+Changelog: https://github.com/sffzh/tempus-f/releases
+
+Summary: A privacy‑friendly degoogled version of Subsonic/Navidrome music player
+Description: |
+  Tempus-F is a degoogled, privacy‑respecting music player that avoids all
+  proprietary Google components. It provides a clean interface, local playback,
+  Subsonic/Navidrome streaming, radio, and podcast support. Fully open-source
+  and suitable for F‑Droid distribution.
+
+RepoType: git
+Repo: https://github.com/sffzh/tempus-f
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 26012501
+    commit: v1.0.0
+    subdir: app
+    env:
+      FDROID: "1"
+    gradle:
+      - degoogledRelease
+    output: Tempus-F-degoogled-release-v1.0.0.26012501.apk
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+UpdateCheckData: ^v(\d+\.\d+\.\d+)$
+
+CurrentVersion: 1.0.0
+CurrentVersionCode: 26012501
