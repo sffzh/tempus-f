@@ -34,16 +34,14 @@ _The project is a fork of [Tempus](https://github.com/eddyizm/tempus) (Which is 
 
 **Use the GitHub version of the app for full Android Auto and Chromecast support.**
 
-sha256 signing key fingerprint   
-`B7:85:01:B9:34:D0:4E:0A:CA:8D:94:AF:D6:72:6A:4D:1D:CE:65:79:7F:1D:41:71:0F:64:3C:29:00:EB:1D:1D`  
 
 ### Releases  
 
 Please note the two variants in the release assets include release/debug and 32/64 bit flavors.
 
-`app-github*` <- The github release with all the android auto/chromecast features 
+`Tempus-F-tempus*` <- The github release with all the android auto/chromecast features 
 
-`app-degoogled*` <- The izzyOnDroid release that goes without any of the google stuff. Both 32/64bit apk's here on github for those who need a 32bit version.
+`Tempus-F-degoogled*` <- The izzyOnDroid release that goes without any of the google stuff. Both 32/64bit apk's here on github for those who need a 32bit version.
 
 ## Features
 
@@ -69,6 +67,10 @@ Please note the two variants in the release assets include release/debug and 32/
 
 
 ## Current Mainly Differences From Tempus
+
+> The current version is functionally aligned with the official Tempus project version 4.9.1.
+>
+> except these changes:
 
 - Optimized application performance to handle specific scenarios (such as playlists with a large number of entries).
 - Expanded lyrics display area.
@@ -124,9 +126,12 @@ Currently there are no tests but I would love to start on some unit tests.
 
 Not a hard requirement but any new feature/change should ideally include an update to the nacent documention. 
 
-## Support
+*Special Thanks*  
 
-[**Buy me a coffee**](https://ko-fi.com/eddyizm)  
+## Donate
+
+[**Buy me a coffee**](https://afdian.com/a/tempus-f)  
+[在**爱发电**上赞助我](https://afdian.com/a/tempus-f)  
 
 ## License
 
@@ -138,4 +143,4 @@ Thanks to the original repo/creator [eddyizm](https://github.com/eddyizm) (forke
 
 And the original project Tempo, created by [CappielloAntonio](https://github.com/CappielloAntonio) (eddyizm/tempus forked from v3.9.0)
 
-Special thanks to the Tempus project for its contributions to internationalization.
+Special thanks to the Tempus project.
