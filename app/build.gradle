@@ -10,7 +10,8 @@ plugins {
 def props = new Properties()
 def propFile = rootProject.file('local.properties')
 def isCI = System.getenv("CI") == "true"
-def isFDroid = System.getenv("FDROID") == "1" // F‑Droid 构建标识
+//def isFDroid = System.getenv("FDROID") == "1" // F‑Droid 构建标识
+def isFDroid = project.hasProperty("FDROID")
 
 if (propFile.exists()) {
     props.load(new FileInputStream(propFile))
