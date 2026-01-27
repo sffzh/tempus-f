@@ -15,6 +15,7 @@ import com.cappielloantonio.tempo.subsonic.models.SubsonicResponse;
 import java.util.List;
 
 public class MainViewModel extends AndroidViewModel {
+
     private static final String TAG = "MainViewModel";
 
     private final SystemRepository systemRepository;

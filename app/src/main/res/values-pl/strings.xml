@@ -330,10 +330,10 @@
     <string name="settings_set_download_folder">Ustaw folder pobierania</string>
     <string name="settings_system_equalizer_summary">Zmień ustawienia audio</string>
     <string name="settings_system_equalizer_title">Korektor systemowy</string>
-    <string name="settings_github_link">https://github.com/eddyizm/tempus</string>
+    <string name="settings_github_link">https://github.com/sffzh/tempus-f</string>
     <string name="settings_github_summary">Śledź tworzenie aplikacji</string>
     <string name="settings_github_title">GitHub</string>
-    <string name="settings_support_discussion_link">https://github.com/eddyizm/tempus/discussions</string>
+    <string name="settings_support_discussion_link">https://github.com/sffzh/tempus-f/discussions</string>
     <string name="settings_github_update">Aktualizacje</string>
     <string name="settings_github_update_title">Sprawdzaj dostępność nowych aktualizacji na githubie</string>
     <string name="settings_github_update_summary">Jeżeli używana jest wersja z githuba, domyślnie aplikacja będzie sprawdzać czy są dostępne nowe wydania apk. Kliknij przełącznik aby, wyłączyć automatyczne sprawdzanie</string>

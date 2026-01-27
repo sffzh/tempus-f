@@ -1,11 +1,13 @@
 package com.cappielloantonio.tempo.repository;
 
 import androidx.lifecycle.LiveData;
+import androidx.media3.common.util.UnstableApi;
 
 import com.cappielloantonio.tempo.database.AppDatabase;
 import com.cappielloantonio.tempo.database.dao.LyricsDao;
 import com.cappielloantonio.tempo.model.LyricsCache;
 
+@UnstableApi
 public class LyricsRepository {
     private final LyricsDao lyricsDao = AppDatabase.getInstance().lyricsDao();
 

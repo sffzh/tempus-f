@@ -228,6 +228,7 @@
     <string name="player_server_priority">Server Priority</string>
     <string name="player_unknown_format">Unknown format</string>
     <string name="player_transcoding">Transcoding</string>
+    <string name="player_transcoding_format">%1$s (%2$s)</string>
     <string name="player_transcoding_requested">requested</string>
     <string name="playlist_catalogue_title">Playlist Catalogue</string>
     <string name="playlist_catalogue_title_expanded">Browse Playlists</string>
@@ -340,10 +341,10 @@
     <string name="settings_set_download_folder">Set download folder</string>
     <string name="settings_system_equalizer_summary">Adjust audio settings</string>
     <string name="settings_system_equalizer_title">System equalizer</string>
-    <string name="settings_github_link">https://github.com/eddyizm/tempus</string>
+    <string name="settings_github_link">https://github.com/sffzh/tempus-f</string>
     <string name="settings_github_summary">Follow the development</string>
     <string name="settings_github_title">Github</string>
-    <string name="settings_support_discussion_link">https://github.com/eddyizm/tempus/discussions</string>
+    <string name="settings_support_discussion_link">https://github.com/sffzh/tempus-f/discussions</string>
     <string name="settings_github_update">Updates</string>
     <string name="settings_github_update_title">Check github for release updates</string>
     <string name="settings_github_update_summary">If using the github version, by default app will check for new apk release. Toggle to disable automatic github checks</string>
@@ -555,4 +556,5 @@
     <string name="search_sort_title">Sort recent searches chronologically</string>
     <string name="search_sort_summary">If enabled, sort searches chronologically. Sort by name if disabled.</string>
     <string name="player_lyrics_sync_content_description">同步歌词位置</string>
+    <string name="ui_empty_description">Lyrics is currently abscent</string>
 </resources>

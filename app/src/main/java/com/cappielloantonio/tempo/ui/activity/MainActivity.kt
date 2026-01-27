@@ -16,6 +16,7 @@ import cn.sffzh.tempus.ui.activity.controller.NavigationController
 import com.cappielloantonio.tempo.databinding.ActivityMainBinding
 import com.cappielloantonio.tempo.ui.activity.base.BaseActivity
 import com.cappielloantonio.tempo.util.AssetLinkUtil
+import com.cappielloantonio.tempo.util.Preferences
 import com.cappielloantonio.tempo.viewmodel.LoginViewModel
 import com.cappielloantonio.tempo.viewmodel.MainViewModel
 
@@ -60,6 +61,8 @@ class MainActivity : BaseActivity() {
         loginNavigator.handleInitialLoginState()
         assetLinkHandler.handleIntent(intent)
 
+        observeOpenSubsonicExtensions()
+
         onBackPressedDispatcher.addCallback(this) {
             if (bottomSheetController.behavior.state ==
                 com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
@@ -103,6 +106,14 @@ class MainActivity : BaseActivity() {
     fun setBottomSheetDraggableState(draggable: Boolean) = bottomSheetController.setDraggable(draggable)
     fun collapseBottomSheetDelayed() = bottomSheetController.collapseDelayed()
 
-//    fun getNavController() = navController
+    private fun observeOpenSubsonicExtensions() {
+    if (Preferences.isLogged()) {
+        mainViewModel.openSubsonicExtensions.observe(this, { openSubsonicExtensions ->
+            if (openSubsonicExtensions != null) {
+                Preferences.setOpenSubsonicExtensions(openSubsonicExtensions)
+            }
+        })
+    }
+}
 }
 

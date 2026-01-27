@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,8 @@ import com.cappielloantonio.tempo.util.Preferences
 import com.cappielloantonio.tempo.viewmodel.PlayerBottomSheetViewModel
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+
+private const val TAG = "PlayerLyricsFragment"
 
 @UnstableApi
 class PlayerLyricsFragment : Fragment() {
@@ -126,7 +129,9 @@ class PlayerLyricsFragment : Fragment() {
     }
 
     private fun observeLyrics() {
+        Log.d(TAG, "observeLyrics: ")
         viewModel.liveLyricsList.observe(viewLifecycleOwner) { lyricsList ->
+
             if (LyricsList.hasStructuredLyrics(lyricsList)) {
                 val lyricLines = lyricsList.toBilingualLines()
                 bind?.lyricView?.setLyrics(lyricLines)
@@ -156,7 +161,7 @@ class PlayerLyricsFragment : Fragment() {
                     bind?.emptyDescriptionImageView?.visibility = View.GONE
                     bind?.titleEmptyDescriptionLabel?.visibility = View.GONE
                     bind?.syncLyricsTapButton?.visibility = View.GONE
-                    bind?.downloadLyricsButton?.visibility = View.VISIBLE
+                    bind?.downloadLyricsButton?.visibility = View.GONE
                 } else {
                     bind?.lyricView?.visibility = View.GONE
                     bind?.nowPlayingSongLyricsSrollView?.visibility = View.GONE

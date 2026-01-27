@@ -10,6 +10,7 @@ import com.cappielloantonio.tempo.subsonic.base.ApiResponse
 import com.cappielloantonio.tempo.subsonic.models.OpenSubsonicExtension
 import com.cappielloantonio.tempo.subsonic.models.ResponseStatus
 import com.cappielloantonio.tempo.subsonic.models.SubsonicResponse
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -60,25 +61,28 @@ class SystemRepository {
     fun ping(): MutableLiveData<SubsonicResponse?> {
         val pingResult = MutableLiveData<SubsonicResponse?>()
 
-        getSubsonicClientInstance(false)
-            .getSystemClient()
-            .ping()
-            .enqueue(object : Callback<ApiResponse?> {
-                override fun onResponse(
-                    call: Call<ApiResponse?>,
-                    response: Response<ApiResponse?>
-                ) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        pingResult.postValue(response.body()!!.subsonicResponse)
-                    } else {
+        CoroutineScope(Dispatchers.IO).launch {
+            SubsonicManager.getSubsonic()
+                .getSystemClient()
+                .ping()
+                .enqueue(object : Callback<ApiResponse?> {
+                    override fun onResponse(
+                        call: Call<ApiResponse?>,
+                        response: Response<ApiResponse?>
+                    ) {
+                        val body = response.body()
+                        if (response.isSuccessful &&  body != null) {
+                            pingResult.postValue(body.subsonicResponse)
+                        } else {
+                            pingResult.postValue(null)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
                         pingResult.postValue(null)
                     }
-                }
-
-                override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
-                    pingResult.postValue(null)
-                }
-            })
+                })
+        }
 
         return pingResult
     }
@@ -86,24 +90,26 @@ class SystemRepository {
     fun getOpenSubsonicExtensions(): MutableLiveData<List<OpenSubsonicExtension>?> {
         val extensionsResult = MutableLiveData<List<OpenSubsonicExtension>?>()
 
-        getSubsonicClientInstance(false)
-            .getSystemClient()
-            .getOpenSubsonicExtensions()
-            .enqueue(object : Callback<ApiResponse?> {
-                override fun onResponse(
-                    call: Call<ApiResponse?>,
-                    response: Response<ApiResponse?>
-                ) {
-                    if (response.isSuccessful && response.body() != null) {
-                        response.body()?.subsonicResponse?.openSubsonicExtensions?: return
-                        extensionsResult.postValue(response.body()?.subsonicResponse?.openSubsonicExtensions)
+        CoroutineScope(Dispatchers.IO).launch {
+            SubsonicManager.getSubsonic()
+                .getSystemClient()
+                .getOpenSubsonicExtensions()
+                .enqueue(object : Callback<ApiResponse?> {
+                    override fun onResponse(
+                        call: Call<ApiResponse?>,
+                        response: Response<ApiResponse?>
+                    ) {
+                        if (response.isSuccessful && response.body() != null) {
+                            response.body()?.subsonicResponse?.openSubsonicExtensions?: return
+                            extensionsResult.postValue(response.body()?.subsonicResponse?.openSubsonicExtensions)
+                        }
                     }
-                }
 
-                override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
-                    extensionsResult.postValue(null)
-                }
-            })
+                    override fun onFailure(call: Call<ApiResponse?>, t: Throwable) {
+                        extensionsResult.postValue(null)
+                    }
+                })
+        }
 
         return extensionsResult
     }

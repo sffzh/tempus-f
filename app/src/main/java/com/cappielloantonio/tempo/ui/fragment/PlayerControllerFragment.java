@@ -543,7 +543,9 @@ public class PlayerControllerFragment extends Fragment {
         boolean isTranscodingBitrate = !MusicUtil.getBitratePreference().equals("0");
 
         if (isTranscodingExtension || isTranscodingBitrate) {
-            playerMediaExtension.setText(MusicUtil.getTranscodingFormatPreference() + " (" + getString(R.string.player_transcoding) + ")");
+            playerMediaExtension.setText(getString(R.string.player_transcoding_format,
+                    MusicUtil.getTranscodingFormatPreference(),
+                    getString(R.string.player_transcoding)));
             playerMediaBitrate.setText(!MusicUtil.getBitratePreference().equals("0") ? MusicUtil.getBitratePreference() + "kbps" : getString(R.string.player_transcoding_requested));
         }
 
