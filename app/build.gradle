@@ -1,18 +1,14 @@
 import com.android.build.api.variant.FilterConfiguration
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-import java.time.LocalDate
-
 plugins {
     id 'com.android.application'
-    // AGP 9.0+ 自动处理 Kotlin 支持，不再需要 org.jetbrains.kotlin.android
-    id 'kotlin-parcelize' 
+    id 'kotlin-parcelize'
 }
 
 def props = new Properties()
 def propFile = rootProject.file('local.properties')
 def isCI = System.getenv("CI") == "true"
-//def isFDroid = System.getenv("FDROID") == "1" // F‑Droid 构建标识
 def isFDroid = project.hasProperty("FDROID")
 
 if (propFile.exists()) {
